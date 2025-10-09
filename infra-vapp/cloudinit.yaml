@@ -1,0 +1,10 @@
+#cloud-config
+password: ${user_password}
+chpasswd:
+  list: |
+    root:${user_password}
+  expire: False
+
+runcmd:
+  - chmod +x /root/setup.sh
+  - /root/setup.sh
