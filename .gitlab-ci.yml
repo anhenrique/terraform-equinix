@@ -1,26 +1,97 @@
 image:
-  name: hashicorp/terraform:light
+  name: hashicorp/terraform:1.7
   entrypoint: [""]
 
 stages:
   - validate
   - plan
   - apply
+  - destroy
+
+variables:
+
+  # Diretório onde está o Terraform
+  TF_ROOT: ${CI_PROJECT_DIR}/terraform
+
+  # Arquivo de state
+  TF_STATE_NAME: production
+  TF_CACHE_KEY: production
+
+  ############################################
+  # VARIAVEIS DO TERRAFORM (INPUT VARIABLES)
+  ############################################
+
+  TF_VAR_vm_count: "1"
+
+  TF_VAR_vm_names: '["vm-app-01"]'
+
+  TF_VAR_network: "rede-producao"
+
+  ############################################
+  # OPCIONAIS
+  ############################################
+
+  TF_LOG: INFO
+  TF_INPUT: "false"
 
 before_script:
+
+  - echo "Iniciando pipeline Terraform"
+
+  - cd ${TF_ROOT}
+
+  - terraform version
+
   - terraform init
 
 validate:
+
   stage: validate
+
   script:
+
+    - terraform fmt -check
+
     - terraform validate
 
 plan:
+
   stage: plan
+
   script:
+
     - terraform plan -out=tfplan
 
+  artifacts:
+
+    paths:
+      - ${TF_ROOT}/tfplan
+
+    expire_in: 1 hour
+
 apply:
+
   stage: apply
+
   script:
+
     - terraform apply -auto-approve tfplan
+
+  dependencies:
+    - plan
+
+  only:
+    - main
+
+destroy:
+
+  stage: destroy
+
+  script:
+
+    - terraform destroy -auto-approve
+
+  when: manual
+
+  only:
+    - main
