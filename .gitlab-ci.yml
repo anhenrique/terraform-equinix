@@ -5,9 +5,11 @@ include:
 
 stages:
   - validate
-  - plan
-  - apply
-  - destroy
+  - test
+  - build
+  - deploy
+  - cleanup
+
 
 variables:
 
