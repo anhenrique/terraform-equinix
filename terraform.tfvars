@@ -9,7 +9,7 @@ allow_unverified_ssl = true
 vapp_catalog     = "terraform"
 template_name    = "Ubuntu Server 22.04 LTS"
 vapp_network     = "LAN - 172.40.0.0/16 - PRD - HSPREVENT"
-vapp_name        = "lab-devops"
+vapp_name        = "git-lab-devops"
 default_password = "!#c!0ud#!"
 
 # Para que isso seja perguntado:
