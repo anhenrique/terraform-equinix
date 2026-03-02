@@ -31,6 +31,8 @@ plan:
   stage: plan
   script:
     - terraform plan -out=tfplan
+      -var-file=environments/${ENV}.tfvars
+      -out=${TF_PLAN}    
   artifacts:
     paths:
       - tfplan
