@@ -2,76 +2,39 @@ image:
   name: hashicorp/terraform:1.7.5
   entrypoint: [""]
 
+variables:
+  TF_ROOT: .
+  TF_STATE_NAME: terraform-state
+  TF_ADDRESS: https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+
+before_script:
+  - terraform init
+    -backend-config=address=${TF_ADDRESS}
+    -backend-config=lock_address=${TF_ADDRESS}/lock
+    -backend-config=unlock_address=${TF_ADDRESS}/lock
+    -backend-config=username=gitlab-ci-token
+    -backend-config=password=${CI_JOB_TOKEN}
+
 stages:
   - validate
   - plan
   - apply
-  - destroy
-
-variables:
-  TF_ROOT: ${CI_PROJECT_DIR}
-  TF_PLAN: tfplan
-  ENV: dev
-
-before_script:
-  - cd ${TF_ROOT}
-  - terraform --version
-  - terraform init
-
-cache:
-  paths:
-    - ${TF_ROOT}/.terraform
-
-############################################
-# VALIDATE
-############################################
 
 validate:
   stage: validate
   script:
     - terraform validate
 
-############################################
-# PLAN
-############################################
-
 plan:
   stage: plan
   script:
-    - terraform plan
-      -var-file=environments/${ENV}.tfvars
-      -out=${TF_PLAN}
+    - terraform plan -out=tfplan
   artifacts:
     paths:
-      - ${TF_ROOT}/${TF_PLAN}
-    expire_in: 1 day
-  rules:
-    - if: $ENV
-
-############################################
-# APPLY (Manual Approval)
-############################################
+      - tfplan
 
 apply:
   stage: apply
   script:
-    - terraform apply -input=false ${TF_PLAN}
-  dependencies:
-    - plan
+    - terraform apply tfplan
   when: manual
-  rules:
-    - if: $ENV
-
-############################################
-# DESTROY (Manual)
-############################################
-
-destroy:
-  stage: destroy
-  script:
-    - terraform destroy
-      -var-file=environments/${ENV}.tfvars
-      -auto-approve
-  when: manual
-  rules:
-    - if: $DESTROY == "true"
