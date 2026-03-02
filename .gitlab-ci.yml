@@ -9,6 +9,9 @@ variables:
 
 before_script:
   - terraform init
+    -input=false \
+    -migrate-state \
+    -force-copy \
     -backend-config=address=${TF_ADDRESS}
     -backend-config=lock_address=${TF_ADDRESS}/lock
     -backend-config=unlock_address=${TF_ADDRESS}/lock
