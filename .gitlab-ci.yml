@@ -8,7 +8,7 @@ stages:
   - test
   - plan
   - apply
-  - cleanup
+  - detroy
 
 
 variables:
