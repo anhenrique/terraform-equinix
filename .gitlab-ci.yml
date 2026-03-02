@@ -1,4 +1,7 @@
-image: hashicorp/terraform:1.7.5
+image:
+  name: hashicorp/terraform:1.7.5
+  entrypoint: [""]
+
 
 variables:
   TF_ROOT: .
