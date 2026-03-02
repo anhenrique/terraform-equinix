@@ -59,7 +59,7 @@ validate:
 plan:
   stage: plan
   environment:
-    name: "${ENV:-dev}"
+    name: "${ENV}"
   script:
     # reinit para garantir backend e workspace corretos
     - terraform init -input=false -reconfigure
@@ -83,7 +83,7 @@ plan:
 apply:
   stage: apply
   environment:
-    name: "${ENV:-dev}"
+    name: "${ENV}"
   dependencies:
     - plan
   when: manual
