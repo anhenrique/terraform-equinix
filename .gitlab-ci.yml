@@ -11,7 +11,7 @@ stages:
 variables:
 
   # Diretório onde está o Terraform
-  TF_ROOT: ${CI_PROJECT_DIR}/terraform
+  TF_ROOT: ${CI_PROJECT_DIR}
 
   # Arquivo de state
   TF_STATE_NAME: production
