@@ -7,122 +7,94 @@ stages:
   - plan
   - apply
 
+# Valores padrão (ajuste se quiser)
 variables:
-
-  TF_ROOT: ${CI_PROJECT_DIR}
-
-  TF_STATE_NAME: ${CI_ENVIRONMENT_NAME}
-
+  TF_ROOT: "."
+  # por padrão pega o environment do job; se vazio, usa "dev" (você pode setar ENV ao rodar pipeline)
+  ENV: "${CI_ENVIRONMENT_NAME}"
+  TF_STATE_NAME: "${ENV}"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
 
+  # backend HTTP (usado pelo Terraform via TF_HTTP_*)
   TF_HTTP_ADDRESS: "${TF_ADDRESS}"
   TF_HTTP_LOCK_ADDRESS: "${TF_ADDRESS}/lock"
   TF_HTTP_UNLOCK_ADDRESS: "${TF_ADDRESS}/lock"
-
   TF_HTTP_LOCK_METHOD: "POST"
   TF_HTTP_UNLOCK_METHOD: "DELETE"
-
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
 
   TF_IN_AUTOMATION: "true"
 
+# cache por branch/environment (reduz conflitos)
 cache:
-  key: ${CI_ENVIRONMENT_NAME}
+  key: "${CI_COMMIT_REF_SLUG}"
   paths:
     - .terraform/
 
 before_script:
   - cd ${TF_ROOT}
+  - export TF_HTTP_ADDRESS="${TF_ADDRESS}"
+  - export TF_HTTP_LOCK_ADDRESS="${TF_ADDRESS}/lock"
+  - export TF_HTTP_UNLOCK_ADDRESS="${TF_ADDRESS}/lock"
+  - export TF_HTTP_LOCK_METHOD="POST"
+  - export TF_HTTP_UNLOCK_METHOD="DELETE"
+  - export TF_HTTP_USERNAME="gitlab-ci-token"
+  - export TF_HTTP_PASSWORD="${CI_JOB_TOKEN}"
   - terraform --version
 
-############################################################
-# VALIDATE
-############################################################
-
+###############################################################################
+# Validate: formatação + validate
+###############################################################################
 validate:
   stage: validate
   script:
     - terraform init -input=false -reconfigure
+    - terraform fmt -check
     - terraform validate
 
-############################################################
-# DEV
-############################################################
-
-plan-dev:
+###############################################################################
+# Plan: geramos o tfplan (por ambiente). ARTIFACT usado pelo apply.
+###############################################################################
+plan:
   stage: plan
   environment:
-    name: dev
+    name: "${ENV:-dev}"
   script:
+    # reinit para garantir backend e workspace corretos
     - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/dev.tfvars \
-        -out=tfplan
+    # opcional: selecionar ou criar workspace, se você usa workspaces por env
+    - |
+      if terraform workspace select "${ENV}" 2>/dev/null; then
+        echo "workspace ${ENV} selected"
+      else
+        terraform workspace new "${ENV}" || true
+      fi
+    - terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
+  artifacts:
+    name: "tfplan-${CI_COMMIT_REF_SLUG}-${ENV}"
+    paths:
+      - tfplan
+    expire_in: 2h
 
-apply-dev:
+###############################################################################
+# Apply: manual (safety). Usa artifact do plan; se estiver stale, refaz o plan.
+###############################################################################
+apply:
   stage: apply
   environment:
-    name: dev
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/dev.tfvars \
-        -auto-approve
-  only:
-    - develop
-
-############################################################
-# HOMOLOGAÇÃO
-############################################################
-
-plan-hml:
-  stage: plan
-  environment:
-    name: hml
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/hml.tfvars \
-        -out=tfplan
-
-apply-hml:
-  stage: apply
-  environment:
-    name: hml
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/hml.tfvars \
-        -auto-approve
-  only:
-    - homolog
-
-############################################################
-# PRODUÇÃO (MANUAL APPROVAL)
-############################################################
-
-plan-prod:
-  stage: plan
-  environment:
-    name: prod
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/prod.tfvars \
-        -out=tfplan
-  only:
-    - main
-
-apply-prod:
-  stage: apply
-  environment:
-    name: prod
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/prod.tfvars \
-        -auto-approve
+    name: "${ENV:-dev}"
+  dependencies:
+    - plan
   when: manual
-  only:
-    - main
+  script:
+    - terraform init -input=false -reconfigure
+    # tenta aplicar o plano; se for stale, recria o plan e aplica
+    - |
+      if terraform apply -input=false tfplan; then
+        echo "Apply successful"
+      else
+        echo "Saved plan stale or failed — recreating plan and applying"
+        terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
+        terraform apply -input=false tfplan
+      fi
