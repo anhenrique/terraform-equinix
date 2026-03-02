@@ -1,30 +1,28 @@
-image:
-  name: hashicorp/terraform:1.7.5
-  entrypoint: [""]
+image: hashicorp/terraform:1.7.5
 
 variables:
   TF_ROOT: .
   TF_STATE_NAME: terraform-state
-  TF_ADDRESS: https://gitlab-hs.hsprevent.com.br/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
-
-before_script:
-  - terraform init -input=false -migrate-state -force-copy \
-      -backend-config="address=${TF_ADDRESS}" \
-      -backend-config="lock_address=${TF_ADDRESS}/lock" \
-      -backend-config="unlock_address=${TF_ADDRESS}/lock" \
-      -backend-config="username=gitlab-ci-token" \
-      -backend-config="password=${CI_JOB_TOKEN}"
-
+  TF_ADDRESS: "https://gitlab-hs.hsprevent.com.br/api/v4/projects/387/terraform/state/default"
 
 stages:
-  - validate
+  - init
   - plan
   - apply
 
-validate:
-  stage: validate
+before_script:
+  - export TF_HTTP_ADDRESS="${TF_ADDRESS}"
+  - export TF_HTTP_LOCK_ADDRESS="${TF_ADDRESS}/lock"
+  - export TF_HTTP_UNLOCK_ADDRESS="${TF_ADDRESS}/lock"
+  - export TF_HTTP_LOCK_METHOD="POST"
+  - export TF_HTTP_UNLOCK_METHOD="DELETE"
+  - export TF_HTTP_USERNAME="gitlab-ci-token"
+  - export TF_HTTP_PASSWORD="${CI_JOB_TOKEN}"
+
+init:
+  stage: init
   script:
-    - terraform validate
+    - terraform init -input=false -reconfigure
 
 plan:
   stage: plan
@@ -37,5 +35,5 @@ plan:
 apply:
   stage: apply
   script:
-    - terraform apply tfplan
+    - terraform apply -input=false tfplan
   when: manual
