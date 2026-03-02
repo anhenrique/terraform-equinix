@@ -6,8 +6,8 @@ include:
 stages:
   - validate
   - test
-  - build
-  - deploy
+  - plan
+  - apply
   - cleanup
 
 
