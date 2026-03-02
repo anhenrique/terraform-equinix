@@ -49,6 +49,8 @@ validate:
 
 plan:
   stage: plan
+  environment:
+    name: dev
   script:
     - terraform plan -input=false -out=tfplan -var-file=environments/${CI_ENVIRONMENT_NAME}.tfvars
   artifacts:
