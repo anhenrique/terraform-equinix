@@ -3,6 +3,7 @@ image:
   entrypoint: [""]
 
 stages:
+  - init
   - validate
   - plan
   - apply
@@ -28,7 +29,7 @@ variables:
   TF_IN_AUTOMATION: "true"
 
 cache:
-  key: ${CI_ENVIRONMENT_NAME}
+  key: terraform
   paths:
     - .terraform/
 
@@ -36,93 +37,28 @@ before_script:
   - cd ${TF_ROOT}
   - terraform --version
 
-############################################################
-# VALIDATE
-############################################################
+init:
+  stage: init
+  script:
+    - terraform init -input=false -reconfigure
 
 validate:
   stage: validate
   script:
-    - terraform init -input=false -reconfigure
     - terraform validate
 
-############################################################
-# DEV
-############################################################
-
-plan-dev:
+plan:
   stage: plan
-  environment:
-    name: dev
   script:
-    - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/dev.tfvars \
-        -out=tfplan
+    - terraform plan -input=false -out=tfplan -var-file=environments/${CI_ENVIRONMENT_NAME}.tfvars
+  artifacts:
+    paths:
+      - tfplan
 
-apply-dev:
+apply:
   stage: apply
-  environment:
-    name: dev
   script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/dev.tfvars \
-        -auto-approve
-  only:
-    - develop
-
-############################################################
-# HOMOLOGAÇÃO
-############################################################
-
-plan-hml:
-  stage: plan
-  environment:
-    name: hml
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/hml.tfvars \
-        -out=tfplan
-
-apply-hml:
-  stage: apply
-  environment:
-    name: hml
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/hml.tfvars \
-        -auto-approve
-  only:
-    - homolog
-
-############################################################
-# PRODUÇÃO (MANUAL APPROVAL)
-############################################################
-
-plan-prod:
-  stage: plan
-  environment:
-    name: prod
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform plan -input=false \
-        -var-file=environments/prod.tfvars \
-        -out=tfplan
-  only:
-    - main
-
-apply-prod:
-  stage: apply
-  environment:
-    name: prod
-  script:
-    - terraform init -input=false -reconfigure
-    - terraform apply -input=false \
-        -var-file=environments/prod.tfvars \
-        -auto-approve
+    - terraform apply -input=false tfplan
   when: manual
-  only:
-    - main
+  environment:
+    name: ${CI_ENVIRONMENT_NAME}
