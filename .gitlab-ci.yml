@@ -60,7 +60,6 @@ plan:
 apply:
   stage: apply
   script:
-    - terraform init -input=false -reconfigure
     - terraform apply -input=false tfplan
   when: manual
   environment:
