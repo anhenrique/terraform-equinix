@@ -25,7 +25,7 @@ before_script:
 init:
   stage: init
   script:
-    - terraform init  -migrate-state -force-copy
+    - terraform init -reconfigure  -migrate-state -force-copy
 
 plan:
   stage: plan
