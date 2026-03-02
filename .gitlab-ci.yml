@@ -1,99 +1,77 @@
-include:
-  - template: Terraform/Base.gitlab-ci.yml 
-  - template: Jobs/SAST-IaC.gitlab-ci.yml
-
+image:
+  name: hashicorp/terraform:1.7.5
+  entrypoint: [""]
 
 stages:
   - validate
-  - test
   - plan
   - apply
   - destroy
 
-
 variables:
-
-  # Diretório onde está o Terraform
-  TF_ROOT: ${CI_PROJECT_DIR}
-
-  # Arquivo de state
-  TF_STATE_NAME: production
-  TF_CACHE_KEY: production
-
-  ############################################
-  # VARIAVEIS DO TERRAFORM (INPUT VARIABLES)
-  ############################################
-
-  TF_VAR_vm_count: "1"
-
-  TF_VAR_vm_names: '["vm-app-01"]'
-
-  TF_VAR_network: "rede-producao"
-
-  ############################################
-  # OPCIONAIS
-  ############################################
-
-  TF_LOG: INFO
-  TF_INPUT: "false"
+  TF_ROOT: terraform
+  TF_PLAN: tfplan
+  ENV: dev
 
 before_script:
-
-  - echo "Iniciando pipeline Terraform"
-
   - cd ${TF_ROOT}
-
-  - terraform version
-
+  - terraform --version
   - terraform init
 
+cache:
+  paths:
+    - ${TF_ROOT}/.terraform
+
+############################################
+# VALIDATE
+############################################
+
 validate:
-
   stage: validate
-
   script:
-
-    - terraform fmt -check
-
     - terraform validate
 
+############################################
+# PLAN
+############################################
+
 plan:
-
   stage: plan
-
-script:
-  - terraform plan -var-file=environments/dev.tfvars -out=tfplan
-
-artifacts:
-
+  script:
+    - terraform plan
+      -var-file=environments/${ENV}.tfvars
+      -out=${TF_PLAN}
+  artifacts:
     paths:
-      - ${TF_ROOT}/tfplan
+      - ${TF_ROOT}/${TF_PLAN}
+    expire_in: 1 day
+  rules:
+    - if: $ENV
 
-    expire_in: 1 hour
+############################################
+# APPLY (Manual Approval)
+############################################
 
 apply:
-
   stage: apply
-
   script:
-
-    - terraform apply -auto-approve tfplan
-
+    - terraform apply -input=false ${TF_PLAN}
   dependencies:
     - plan
+  when: manual
+  rules:
+    - if: $ENV
 
-  only:
-    - main
+############################################
+# DESTROY (Manual)
+############################################
 
 destroy:
-
   stage: destroy
-
   script:
-
-    - terraform destroy -auto-approve
-
+    - terraform destroy
+      -var-file=environments/${ENV}.tfvars
+      -auto-approve
   when: manual
-
-  only:
-    - main
+  rules:
+    - if: $DESTROY == "true"
