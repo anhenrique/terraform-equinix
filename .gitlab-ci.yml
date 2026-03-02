@@ -5,7 +5,7 @@ image:
 variables:
   TF_ROOT: .
   TF_STATE_NAME: terraform-state
-  TF_ADDRESS: https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+  TF_ADDRESS: https://gitlab-hs.hsprevent.com.br/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
 
 before_script:
   - terraform init
