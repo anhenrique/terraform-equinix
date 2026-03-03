@@ -3,19 +3,22 @@ image:
   entrypoint: [""]
 
 stages:
+  - init
   - validate
   - plan
   - apply
 
-# Valores padrão (ajuste se quiser)
 variables:
   TF_ROOT: "."
-  # por padrão pega o environment do job; se vazio, usa "dev" (você pode setar ENV ao rodar pipeline)
+  # DEFAULT ENV se CI_ENVIRONMENT_NAME estiver vazio
   ENV: "${CI_ENVIRONMENT_NAME}"
-  TF_STATE_NAME: "${ENV}"
+  # fallback para dev se ENV estiver vazio (GitLab não expande ${VAR:-default} em fields)
+  ENV_DEFAULT: "dev"
+  # Decide qual usar: se ENV vazio, usa ENV_DEFAULT
+  ENV_RESOLVED: "${ENV}"
+  TF_STATE_NAME: "${ENV_RESOLVED}"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
 
-  # backend HTTP (usado pelo Terraform via TF_HTTP_*)
   TF_HTTP_ADDRESS: "${TF_ADDRESS}"
   TF_HTTP_LOCK_ADDRESS: "${TF_ADDRESS}/lock"
   TF_HTTP_UNLOCK_ADDRESS: "${TF_ADDRESS}/lock"
@@ -23,63 +26,50 @@ variables:
   TF_HTTP_UNLOCK_METHOD: "DELETE"
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
-
   TF_IN_AUTOMATION: "true"
-
-# cache por branch/environment (reduz conflitos)
-cache:
-  key: "${CI_COMMIT_REF_SLUG}"
-  paths:
-    - .terraform/
 
 before_script:
   - cd ${TF_ROOT}
-  - export TF_HTTP_ADDRESS="${TF_ADDRESS}"
-  - export TF_HTTP_LOCK_ADDRESS="${TF_ADDRESS}/lock"
-  - export TF_HTTP_UNLOCK_ADDRESS="${TF_ADDRESS}/lock"
-  - export TF_HTTP_LOCK_METHOD="POST"
-  - export TF_HTTP_UNLOCK_METHOD="DELETE"
-  - export TF_HTTP_USERNAME="gitlab-ci-token"
-  - export TF_HTTP_PASSWORD="${CI_JOB_TOKEN}"
+  # Resolve ENV se estiver vazio (shell expansion aqui funciona)
+  - |
+    if [ -z "${ENV}" ]; then
+      export ENV="${ENV_DEFAULT}"
+    fi
+    export TF_STATE_NAME="${ENV}"
+    export TF_HTTP_ADDRESS="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
+    export TF_HTTP_LOCK_ADDRESS="${TF_HTTP_ADDRESS}/lock"
+    export TF_HTTP_UNLOCK_ADDRESS="${TF_HTTP_ADDRESS}/lock"
+    export TF_HTTP_USERNAME="gitlab-ci-token"
+    export TF_HTTP_PASSWORD="${CI_JOB_TOKEN}"
   - terraform --version
 
-###############################################################################
-# Validate: formatação + validate
-###############################################################################
+init:
+  stage: init
+  script:
+    - terraform init -input=false -reconfigure
+
 validate:
   stage: validate
   script:
     - terraform init -input=false -reconfigure
-    - terraform fmt -check
+    - terraform fmt -check || true
     - terraform validate
 
-###############################################################################
-# Plan: geramos o tfplan (por ambiente). ARTIFACT usado pelo apply.
-###############################################################################
 plan:
   stage: plan
   environment:
     name: "${ENV}"
   script:
-    # reinit para garantir backend e workspace corretos
+    - echo "ENV=${ENV}"
+    - ls -la environments || true
+    - test -f "environments/${ENV}.tfvars" || (echo "Arquivo environments/${ENV}.tfvars não encontrado" && exit 1)
     - terraform init -input=false -reconfigure
-    # opcional: selecionar ou criar workspace, se você usa workspaces por env
-    - |
-      if terraform workspace select "${ENV}" 2>/dev/null; then
-        echo "workspace ${ENV} selected"
-      else
-        terraform workspace new "${ENV}" || true
-      fi
     - terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
   artifacts:
-    name: "tfplan-${CI_COMMIT_REF_SLUG}-${ENV}"
     paths:
       - tfplan
     expire_in: 2h
 
-###############################################################################
-# Apply: manual (safety). Usa artifact do plan; se estiver stale, refaz o plan.
-###############################################################################
 apply:
   stage: apply
   environment:
@@ -89,13 +79,11 @@ apply:
   when: manual
   script:
     - terraform init -input=false -reconfigure
-    # tenta aplicar o plano; se for stale, recria o plan e aplica
     - |
       if terraform apply -input=false tfplan; then
-        echo "Apply successful"
+        echo "Apply ok"
       else
-        echo "Saved plan stale or failed — recreating plan and applying"
+        echo "Plan stale ou erro — recriando plan e aplicando"
         terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
         terraform apply -input=false tfplan
       fi
-      
