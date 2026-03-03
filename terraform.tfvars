@@ -2,7 +2,6 @@
 vcd_url              = "https://ehcportal-sp.equinix.com.br/api"
 vcd_org              = "HSPREVENTLTDA627268"
 vcd_vdc              = "HSPREVENTL-0975-DM-VDC"
-vcd_api_token        = "vvjzE8uwogOKoHMnCG0tnj3ToY8B2gaZ"
 allow_unverified_ssl = true
 
 # Infraestrutura
