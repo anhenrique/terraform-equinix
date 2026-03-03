@@ -98,3 +98,4 @@ apply:
         terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
         terraform apply -input=false tfplan
       fi
+      
