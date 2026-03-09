@@ -1,93 +1,172 @@
-# terraform-equinix
+# Terraform Equinix vApp Deployment
 
+Este projeto contém configurações Terraform para implantar vApps (Virtual Applications) no VMware Cloud Director (vCD) da Equinix. Ele permite criar e gerenciar máquinas virtuais (VMs) em um ambiente virtualizado.
 
+## Descrição
 
-## Getting started
+O projeto utiliza um módulo Terraform localizado em `infra-vapp/` para provisionar vApps contendo múltiplas VMs baseadas em templates do catálogo vCD. As VMs são configuradas com recursos personalizáveis como CPU, memória e rede.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Pré-requisitos
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.7.5
+- Acesso ao VMware Cloud Director (vCD) da Equinix
+- Token de API do vCD
+- Conta com permissões para criar vApps e VMs no VDC especificado
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Estrutura do Projeto
 
 ```
-cd existing_repo
-git remote add origin https://gitlab-hs.hsprevent.com.br/devops/terraform-equinix.git
-git branch -M main
-git push -uf origin main
+terraform-equinix/
+├── main.tf                 # Configuração principal do módulo
+├── variables.tf            # Definição de variáveis
+├── terraform.tfvars        # Valores padrão das variáveis
+├── output.tf               # Outputs do Terraform
+├── provider.tf             # Configuração do provider vCD
+├── backend.tf              # Configuração do backend (GitLab)
+├── environments/           # Arquivos de variáveis por ambiente
+│   └── dev.tfvars          # Variáveis para ambiente de desenvolvimento
+├── infra-vapp/             # Módulo para criação do vApp
+│   ├── vapp.tf             # Recursos do vApp
+│   ├── variables.tf        # Variáveis do módulo
+│   ├── output.tf           # Outputs do módulo
+│   ├── providers.tf        # Providers do módulo
+│   ├── cloudinit.yaml      # Template Cloud-Init
+│   └── scripts/            # Scripts de configuração
+└── .gitlab-ci.yml          # Pipeline CI/CD GitLab
 ```
 
-## Integrate with your tools
+## Configuração
 
-- [ ] [Set up project integrations](https://gitlab-hs.hsprevent.com.br/devops/terraform-equinix/-/settings/integrations)
+### Variáveis Principais
 
-## Collaborate with your team
+| Variável | Descrição | Tipo | Obrigatório |
+|----------|-----------|------|-------------|
+| `vcd_url` | URL base do vCD | string | Sim |
+| `vcd_org` | Organização no vCD | string | Sim |
+| `vcd_vdc` | VDC dentro da organização | string | Sim |
+| `vcd_api_token` | Token de API para autenticação | string | Sim |
+| `vapp_name` | Nome do vApp | string | Sim |
+| `vapp_network` | Rede da organização | string | Sim |
+| `vapp_catalog` | Catálogo que contém a template | string | Sim |
+| `template_name` | Nome da template | string | Sim |
+| `vm_numbers` | Quantidade de VMs | number | Sim |
+| `vm_name_prefix` | Prefixo para nome das VMs | string | Sim |
+| `default_password` | Senha padrão para VMs | string | Sim |
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Arquivo terraform.tfvars
 
-## Test and Deploy
+Edite o arquivo `terraform.tfvars` com seus valores específicos:
 
-Use the built-in continuous integration in GitLab.
+```hcl
+vcd_url          = "https://portal/api"
+vcd_org          = "sua-organizacao"
+vcd_vdc          = "seu-vdc"
+vcd_api_token    = "seu-token-api"
+vapp_name        = "meu-vapp"
+vapp_network     = "rede-organizacao"
+vapp_catalog     = "meu-catalogo"
+template_name    = "ubuntu-20.04"
+vm_numbers       = 2
+vm_name_prefix   = "vm-"
+default_password = "sua-senha-padrao"
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Uso
 
-***
+### Inicialização
 
-# Editing this README
+```bash
+terraform init
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Planejamento
 
-## Suggestions for a good README
+```bash
+terraform plan
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Aplicação
 
-## Name
-Choose a self-explaining name for your project.
+```bash
+terraform apply
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Destruição
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+terraform destroy
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Ambientes
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+O projeto suporta múltiplos ambientes através de arquivos `.tfvars` na pasta `environments/`.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+- `dev.tfvars`: Ambiente de desenvolvimento
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Para usar um ambiente específico:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```bash
+terraform plan -var-file=environments/dev.tfvars
+terraform apply -var-file=environments/dev.tfvars
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## CI/CD
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+O projeto inclui um pipeline GitLab CI/CD (`.gitlab-ci.yml`) que automatiza:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- Inicialização do Terraform
+- Validação da configuração
+- Planejamento das mudanças
+- Aplicação das mudanças (em branches protegidos)
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+O estado do Terraform é gerenciado pelo GitLab e separado por ambiente.
 
-## License
-For open source projects, say how it is licensed.
+### Variáveis de CI/CD Necessárias
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Configure as seguintes variáveis no GitLab:
+
+- `VCD_API_TOKEN`: Token de API do vCD
+- `VCD_URL`: URL do vCD
+- `VCD_ORG`: Organização vCD
+- `VCD_VDC`: VDC
+
+## Outputs
+
+Após a aplicação, o Terraform fornecerá os seguintes outputs:
+
+- `vm_ips`: IPs das VMs criadas
+- `vapp_id`: ID do vApp
+- Outros outputs definidos em `output.tf` e `infra-vapp/output.tf`
+
+## Troubleshooting
+
+### Problemas Comuns
+
+1. **Erro de autenticação**: Verifique se o token de API é válido e tem as permissões necessárias.
+
+2. **Rede não encontrada**: Confirme que a rede especificada existe no VDC.
+
+3. **Template não encontrada**: Verifique se o catálogo e template existem e estão acessíveis.
+
+4. **Limites de recursos**: Certifique-se de que há recursos suficientes (CPU, memória) no VDC.
+
+### Logs de Debug
+
+Para mais detalhes em caso de erro:
+
+```bash
+export TF_LOG=DEBUG
+terraform apply
+```
+
+## Contribuição
+
+1. Faça fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Merge Request
+
+## Licença
+
+Este projeto está sob a licença [MIT](LICENSE.txt).
