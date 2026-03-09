@@ -27,6 +27,7 @@ variables:
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
   TF_IN_AUTOMATION: "true"
+  TF_VAR_token: "${TF_VAR_token}"
 
 before_script:
   - cd ${TF_ROOT}
@@ -41,6 +42,7 @@ before_script:
     export TF_HTTP_UNLOCK_ADDRESS="${TF_HTTP_ADDRESS}/lock"
     export TF_HTTP_USERNAME="gitlab-ci-token"
     export TF_HTTP_PASSWORD="${CI_JOB_TOKEN}"
+    export TF_VAR_token=TF_VAR_token: "${TF_VAR_token}"
   - terraform --version
 
 init:
@@ -64,7 +66,7 @@ plan:
     - ls -la environments || true
     - test -f "environments/${ENV}.tfvars" || (echo "Arquivo environments/${ENV}.tfvars não encontrado" && exit 1)
     - terraform init -input=false -reconfigure
-    - terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
+    - terraform plan -input=false -out=tfplan  -var="vcd_api_token=${TF_VAR_token}" -var-file="environments/${ENV}.tfvars"
   artifacts:
     paths:
       - tfplan
@@ -78,7 +80,7 @@ apply:
     - plan
   when: manual
   script:
-    - terraform init -input=false -reconfigure
+    - terraform init -input=false -reconfigure -var="vcd_api_token=${TF_VAR_token}"
     - |
       if terraform apply -input=false tfplan; then
         echo "Apply ok"
