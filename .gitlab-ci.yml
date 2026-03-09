@@ -58,9 +58,9 @@ validate:
 plan:
   stage: plan
   environment:
-    name: "${ENV}"
+    name: "${ENV_DEFAULT}"
   script:
-    - echo "ENV=${ENV}"
+    - echo "ENV=${ENV_DEFAULT}"
     - ls -la environments || true
     - test -f "environments/${ENV}.tfvars" || (echo "Arquivo environments/${ENV}.tfvars não encontrado" && exit 1)
     - terraform init -input=false -reconfigure
