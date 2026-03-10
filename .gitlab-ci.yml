@@ -61,6 +61,8 @@ plan:
   environment:
     name: "${ENV_DEFAULT}"
   script:
+    - echo "DEBUG VARS:"
+    - env | grep TF_VAR
     - echo "ENV=${ENV_DEFAULT}"
     - ls -la environments || true
     - test -f "environments/${ENV}.tfvars" || (echo "Arquivo environments/${ENV}.tfvars não encontrado" && exit 1)
