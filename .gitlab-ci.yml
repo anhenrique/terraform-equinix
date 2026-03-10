@@ -64,6 +64,7 @@ plan:
     - echo "ENV=${ENV_DEFAULT}"
     - ls -la environments || true
     - test -f "environments/${ENV}.tfvars" || (echo "Arquivo environments/${ENV}.tfvars não encontrado" && exit 1)
+    - echo "$TF_VAR_vcd_api_token"
     - terraform init -input=false -reconfigure
     - terraform plan -input=false -out=tfplan   -var-file="environments/${ENV}.tfvars"
   artifacts:
