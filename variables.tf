@@ -51,10 +51,10 @@ variable "vm_numbers" {
 
 }
 
-variable "vm_name_prefix" {
-  type        = string
-  description = "Prefixo para nome das VMs"
-}
+#variable "vm_name_prefix" {
+#  type        = string
+#  description = "Prefixo para nome das VMs"
+#}
 
 variable "memory" {
   type        = number

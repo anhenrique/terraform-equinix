@@ -18,10 +18,10 @@ variable "template_name" {
   description = "Nome exato da template no catálogo"
 }
 
-variable "vm_name_prefix" {
-  type        = string
-  description = "Prefixo usado para nomear as VMs"
-}
+#variable "vm_name_prefix" {
+#  type        = string
+#  description = "Prefixo usado para nomear as VMs"
+#}
 
 variable "vm_numbers" {
   type        = number

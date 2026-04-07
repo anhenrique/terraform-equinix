@@ -9,7 +9,7 @@ module "infra_vapp" {
   template_name = var.template_name
   server_names = var.server_names
 
-  vm_name_prefix      = var.vm_name_prefix
+  #vm_name_prefix      = var.vm_name_prefix
   vm_numbers          = var.vm_numbers
   memory              = var.memory
   cpus                = var.cpus
