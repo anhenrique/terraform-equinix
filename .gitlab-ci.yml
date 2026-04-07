@@ -7,7 +7,7 @@ stages:
   - validate
   - plan
   - apply
-
+  - destroy
 variables:
   TF_ROOT: "."
   # DEFAULT ENV se CI_ENVIRONMENT_NAME estiver vazio
@@ -90,3 +90,13 @@ apply:
         terraform plan -input=false -out=tfplan -var-file="environments/${ENV}.tfvars"
         terraform apply -input=false tfplan
       fi
+
+destroy:
+  stage: destroy
+  environment:
+    name: "${ENV}"
+    action: stop
+  when: manual
+  script:
+    - terraform init -input=false -reconfigure
+    - terraform destroy -auto-approve -var="vcd_api_token=${TF_VAR_vcd_api_token}" -var-file="environments/${ENV}.tfvars"
