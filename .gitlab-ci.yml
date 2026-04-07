@@ -1,5 +1,5 @@
 image:
-  name: hashicorp/terraform:1.7.5
+  name: hashicorp/terraform:1.14.8
   entrypoint: [""]
 
 stages:

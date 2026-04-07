@@ -14,7 +14,5 @@ output "vm_ids" {
 }
 
 output "vapp_vm_ips" {
-  description = "IPs das máquinas virtuais"
-  # Usamos um loop 'for' para pegar o IP da primeira rede de cada VM
   value = [for vm in vcd_vapp_vm.vms : vm.network.ip]
 }
