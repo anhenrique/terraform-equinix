@@ -14,7 +14,7 @@ output "vm_ids" {
 }
 
 output "vapp_vm_ips" {
-  description = "IPs das máquinas virtuais criadas"
-  # Adicionamos  para acessar o primeiro item da lista de redes
+  description = "Lista de endereços IP das instâncias na Equinix"
+  # Adicionamos  para acessar o primeiro elemento da lista de rede
   value = [for vm in vcd_vapp_vm.vms : vm.network.ip]
 }
