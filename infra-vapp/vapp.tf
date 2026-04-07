@@ -3,13 +3,6 @@ resource "vcd_vapp" "my_vapp" {
   power_on = true
 }
 
-resource "vcd_vapp_org_network" "network" {
-  vapp_name        = vcd_vapp.my_vapp.name
-  org_network_name = var.vapp_network
-
-  depends_on = [vcd_vapp.my_vapp]
-}
-
 data "vcd_catalog" "catalog" {
   org  = var.vcd_org
   name = var.vapp_catalog
@@ -22,10 +15,10 @@ data "vcd_catalog_vapp_template" "template" {
 }
 
 resource "vcd_vapp_vm" "vms" {
-  name = var.vm_numbers
+  count = length(var.server_names)
 
   vapp_name        = vcd_vapp.my_vapp.name
-  name             = format("%s-%02d", var.vm_name_prefix, count.index + 1)
+  name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
 
   memory    = var.memory

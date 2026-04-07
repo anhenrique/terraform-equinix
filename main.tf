@@ -7,6 +7,7 @@ module "infra_vapp" {
   vapp_network  = var.vapp_network
   vapp_catalog  = var.vapp_catalog
   template_name = var.template_name
+  server_names = var.server_names
 
   vm_name_prefix      = var.vm_name_prefix
   vm_numbers          = var.vm_numbers

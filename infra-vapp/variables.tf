@@ -63,3 +63,8 @@ variable "vcd_vdc" {
   type        = string
   description = "VDC dentro da org (para uso no módulo)"
 }
+
+variable "server_names" {
+  type = list(string)
+  description = "Lista de servidores criados de acordo com o .tfvars do CI/CD"
+}

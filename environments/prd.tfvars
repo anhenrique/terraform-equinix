@@ -1,6 +1,4 @@
 vm_numbers     = 13
-vm_name_prefix = "gmud_"
-vm_network     = "LAN - 10.90.0.0/24 - PRD - APP"
 
 vapp_catalog     = "terraform"
 template_name    = "Ubuntu Server 22.04 LTS"
@@ -8,7 +6,7 @@ vapp_network     = "LAN - 10.90.0.0/24 - PRD - APP"
 vapp_name        = "git-prd-devops"
 default_password = "!#c!0ud#!"
 
-nomes_dos_servicos = [
+server_names = [
 "PRD-HS-WANVSO",
 "HML-HS-GLINER",
 "PRD-HS-SIGAPP",
