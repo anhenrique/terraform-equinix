@@ -22,7 +22,7 @@ data "vcd_catalog_vapp_template" "template" {
 }
 
 resource "vcd_vapp_vm" "vms" {
-  count = var.vm_numbers
+  name = var.vm_numbers
 
   vapp_name        = vcd_vapp.my_vapp.name
   name             = format("%s-%02d", var.vm_name_prefix, count.index + 1)

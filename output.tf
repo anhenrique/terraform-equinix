@@ -12,3 +12,8 @@ output "vm_ids" {
   description = "IDs das VMs criadas pelo módulo"
   value       = module.infra_vapp.vm_ids
 }
+
+output "ips_das_vms_equinix" {
+  description = "Lista de endereços IP das instâncias implantadas"
+  value       = module.infra-vapp.vapp_vm_ips
+}
