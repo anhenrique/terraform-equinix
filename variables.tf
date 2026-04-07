@@ -59,13 +59,13 @@ variable "vm_name_prefix" {
 variable "memory" {
   type        = number
   description = "RAM por VM (MB)"
-  default     = 4096
+  #default     = 4096
 }
 
 variable "cpus" {
   type        = number
   description = "Número de vCPUs por VM"
-  default     = 2
+  #default     = 2
 }
 
 variable "cpu_cores" {
