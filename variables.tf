@@ -84,3 +84,8 @@ variable "default_password" {
   description = "Senha padrão para VMs"
   sensitive   = true
 }
+
+variable "server_names" {
+  type = list(string)
+  description = "Lista de servidores criados de acordo com o .tfvars do CI/CD"
+}
