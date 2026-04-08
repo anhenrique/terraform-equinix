@@ -17,10 +17,13 @@ data "vcd_catalog_vapp_template" "template" {
 resource "vcd_vapp_vm" "vms" {
   count = length(var.server_names)
 
+
   vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
-
+  
+  computer_name = "srv-${var.server_names[count.index]}"
+  
   memory    = var.memory
   cpus      = var.cpus
   cpu_cores = var.cpu_cores
@@ -36,18 +39,27 @@ resource "vcd_vapp_vm" "vms" {
 
   customization {
     force                      = var.force_customization
-    enabled                    = false # Desabilitamos a customização automática do vCD
+    enabled                    = true # Mantemos true para que o script rode no primeiro boot [1]
     allow_local_admin_password = true
     auto_generate_password     = false
-    admin_password = var.default_password
-    # Se seu template suporta initscript (script shell)
-    initscript = file("${path.module}/scripts/setup.sh")
+    admin_password             = var.default_password
+    # Carrega o script shell externo
+    initscript                 = file("${path.module}/scripts/setup.sh")
   }
 
+  # O guest_properties DEVE estar dentro do recurso da VM
   guest_properties = {
     "user-data" = base64encode(templatefile("${path.module}/cloudinit.yaml", {
       user_password = var.default_password
     }))
+  }
+
+  # O lifecycle impede que o Terraform tente "corrigir" ou remover o script no portal depois [2]
+  lifecycle {
+    ignore_changes = [
+      customization.initscript,
+      customization.enabled
+    ]
   }
 }
 

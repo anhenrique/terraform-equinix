@@ -7,13 +7,14 @@ stages:
   - validate
   - plan
   - apply
+  - ansible
   - destroy
 variables:
   TF_ROOT: "."
   # DEFAULT ENV se CI_ENVIRONMENT_NAME estiver vazio
   ENV: "${CI_ENVIRONMENT_NAME}"
   # fallback para dev se ENV estiver vazio (GitLab não expande ${VAR:-default} em fields)
-  ENV_DEFAULT: "prd"
+  ENV_DEFAULT: "hml"
   # Decide qual usar: se ENV vazio, usa ENV_DEFAULT
   ENV_RESOLVED: "${ENV}"
   TF_STATE_NAME: "${ENV_RESOLVED}"
@@ -91,6 +92,48 @@ apply:
         terraform apply -input=false tfplan
       fi
 
+ansible-provision:
+  stage: ansible
+  image: alpine/curl
+  needs:
+    - terraform-apply
+  script:
+    - VM_IPS=$(cat vm_ips.json)
+
+    # Dispara o job e captura o ID
+    - |
+      JOB_ID=$(curl -s -X POST \
+        https://awx.seudominio.com/api/v2/job_templates/${AWX_TEMPLATE_ID}/launch/ \
+        -H "Authorization: Bearer ${AWX_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"extra_vars\": {\"vm_ips\": $VM_IPS}}" \
+        | jq -r '.id')
+
+    - echo "AWX Job ID: $JOB_ID"
+
+    # Aguarda o job terminar (polling)
+    - |
+      while true; do
+        STATUS=$(curl -s \
+          https://awx.seudominio.com/api/v2/jobs/${JOB_ID}/ \
+          -H "Authorization: Bearer ${AWX_TOKEN}" \
+          | jq -r '.status')
+
+        echo "Status: $STATUS"
+
+        if [ "$STATUS" = "successful" ]; then
+          echo "Job concluído com sucesso!"
+          break
+        elif [ "$STATUS" = "failed" ] || [ "$STATUS" = "error" ] || [ "$STATUS" = "canceled" ]; then
+          echo "Job falhou com status: $STATUS"
+          exit 1
+        fi
+
+        sleep 15
+      done
+  variables:
+    AWX_TEMPLATE_ID: "42"  # ID do seu Job Template no AWX
+    
 destroy:
   stage: destroy
   environment:

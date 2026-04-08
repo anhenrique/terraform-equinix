@@ -18,3 +18,9 @@ output "vapp_vm_ips" {
   # Observe o  logo após a palavra network
   value = [for vm in vcd_vapp_vm.vms : vm.network[0].ip]
 }
+
+output "vapp_vm_inventory" {
+  description = "Inventário detalhado das VMs criadas"
+  # Criamos um mapa onde a CHAVE é o nome e o VALOR é o IP
+  value = { for vm in vcd_vapp_vm.vms : vm.name => vm.network.ip }
+}
