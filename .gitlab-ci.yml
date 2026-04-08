@@ -96,7 +96,7 @@ ansible-provision:
   stage: ansible
   image: alpine/curl
   needs:
-    - terraform-apply
+    - apply
   when: manual
   script:
     - apk add --no-cache jq
