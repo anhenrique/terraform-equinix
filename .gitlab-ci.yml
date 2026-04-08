@@ -27,7 +27,7 @@ variables:
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
   TF_IN_AUTOMATION: "true"
-  
+  VCD_CACHE: "true" # Ativa o mecanismo de cache [1], [2]
 
 before_script:
   - cd ${TF_ROOT}
