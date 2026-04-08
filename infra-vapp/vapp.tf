@@ -54,13 +54,6 @@ resource "vcd_vapp_vm" "vms" {
     }))
   }
 
-  # O lifecycle impede que o Terraform tente "corrigir" ou remover o script no portal depois [2]
-  lifecycle {
-    ignore_changes = [
-      customization[0].initscript,
-      customization[0].enabled
-    ]
-  }
 }
 
 resource "vcd_vapp_org_network" "networks" {
