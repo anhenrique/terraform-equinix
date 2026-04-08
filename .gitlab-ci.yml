@@ -60,7 +60,7 @@ validate:
 plan:
   stage: plan
   environment:
-    name: "${ENV_DEFAULT}"
+    name: "hml"
   script:
     - echo "DEBUG VARS:"
     - env | grep TF_VAR
@@ -77,7 +77,7 @@ plan:
 apply:
   stage: apply
   environment:
-    name: "${ENV}"
+    name: "hml"
   dependencies:
     - plan
   when: manual
