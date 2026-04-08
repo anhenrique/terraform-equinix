@@ -12,5 +12,5 @@ default_password = "!#c!0ud#!"
 # Nome que deseja aplciar nos novos servidores
 
 server_names = [
-"HML-HS-TESTE",
+"HML-HS-TESTE2",
 ]
