@@ -23,7 +23,7 @@ resource "vcd_vapp_vm" "vms" {
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
   
   computer_name = "srv-${var.server_names[count.index]}"
-  
+
   memory    = var.memory
   cpus      = var.cpus
   cpu_cores = var.cpu_cores
@@ -57,8 +57,8 @@ resource "vcd_vapp_vm" "vms" {
   # O lifecycle impede que o Terraform tente "corrigir" ou remover o script no portal depois [2]
   lifecycle {
     ignore_changes = [
-      customization.initscript,
-      customization.enabled
+      customization[0].initscript,
+      customization[0].enabled
     ]
   }
 }
