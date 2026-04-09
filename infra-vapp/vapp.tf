@@ -64,5 +64,12 @@ resource "vcd_vapp_org_network" "networks" {
   # Esta configuração impede que o Terraform destrua o recurso
   lifecycle {
     prevent_destroy = false
+    ignore_changes = [
+      customization,
+      guest_properties,
+      vapp_template_id, # Evita re-deploy se o ID do template no catálogo mudar
+      # Se você não quiser que o Terraform tente "corrigir" o disco após criado:
+      # storage_profile 
+    ]
   }
 }
