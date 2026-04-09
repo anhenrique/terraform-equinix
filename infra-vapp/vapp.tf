@@ -40,7 +40,7 @@ resource "vcd_vapp_vm" "vms" {
 
   customization {
     force                      = var.force_customization
-    enabled                    = false # Desabilitamos a customização automática do vCD
+    enabled                    = true # Desabilitamos a customização automática do vCD
     allow_local_admin_password = true
     auto_generate_password     = false
     admin_password = var.default_password
