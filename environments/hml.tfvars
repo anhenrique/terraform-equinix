@@ -1,5 +1,5 @@
 # Quantidade de VMS que deseja criar
-vm_numbers     = 3
+vm_numbers     = 4
 
 #Catalogo de maquinas, rede e senha defult, mude conforme necessidade
 
@@ -15,5 +15,6 @@ storage_profile = "EHC-DM-T2"
 server_names = [
 "HML-HS-TES_3",
 "HML-HS-NOVO",
-"HML-HS_teste3"
+"HML-HS_teste3",
+"HML-HS-NOVO2"
 ]
