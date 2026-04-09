@@ -59,6 +59,7 @@ resource "vcd_vapp_vm" "vms" {
       customization,
       guest_properties,
       vapp_template_id,
+      power_on,
     ]
   }  
 }
