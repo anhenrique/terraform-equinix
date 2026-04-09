@@ -1,5 +1,5 @@
 # Quantidade de VMS que deseja criar
-vm_numbers     = 5
+vm_numbers     = 6
 
 #Catalogo de maquinas, rede e senha defult, mude conforme necessidade
 
@@ -17,5 +17,6 @@ server_names = [
 "HML-HS-NOVO",
 "HML-HS_teste3",
 "HML-HS-NOVO2",
-"aaaaaaaaaa"
+"aaaaaaaaaa",
+"dsaokdsoa"
 ]
