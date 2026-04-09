@@ -17,18 +17,19 @@ data "vcd_catalog_vapp_template" "template" {
 resource "vcd_vapp_vm" "vms" {
   count = length(var.server_names)
 
-
   vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
-  
-  computer_name = "srv-${var.server_names[count.index]}"
 
   memory    = var.memory
   cpus      = var.cpus
   cpu_cores = var.cpu_cores
   power_on  = true
   vdc       = var.vcd_vdc
+
+ # Define a política de disco principal da VM
+  storage_profile = var.storage_profile
+
 
   network {
     type               = "org"
@@ -39,21 +40,19 @@ resource "vcd_vapp_vm" "vms" {
 
   customization {
     force                      = var.force_customization
-    enabled                    = true # Mantemos true para que o script rode no primeiro boot [1]
+    enabled                    = false # Desabilitamos a customização automática do vCD
     allow_local_admin_password = true
     auto_generate_password     = false
-    admin_password             = var.default_password
-    # Carrega o script shell externo
-    initscript                 = file("${path.module}/scripts/setup.sh")
+    admin_password = var.default_password
+    # Se seu template suporta initscript (script shell)
+    initscript = file("${path.module}/scripts/setup.sh")
   }
 
-  # O guest_properties DEVE estar dentro do recurso da VM
   guest_properties = {
     "user-data" = base64encode(templatefile("${path.module}/cloudinit.yaml", {
       user_password = var.default_password
     }))
   }
-
 }
 
 resource "vcd_vapp_org_network" "networks" {
@@ -62,6 +61,6 @@ resource "vcd_vapp_org_network" "networks" {
 
   # Esta configuração impede que o Terraform destrua o recurso
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }

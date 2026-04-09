@@ -89,3 +89,8 @@ variable "server_names" {
   type = list(string)
   description = "Lista de servidores criados de acordo com o .tfvars do CI/CD"
 }
+
+variable "storage_profile" {
+  type        = string
+  description = "Política de disco da VM (ex: EHC-DM-VHD, Tier 2, etc.)"
+}
