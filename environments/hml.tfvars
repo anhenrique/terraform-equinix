@@ -1,5 +1,5 @@
 # Quantidade de VMS que deseja criar
-vm_numbers     = 8
+vm_numbers     = 9
 
 #Catalogo de maquinas, rede e senha defult, mude conforme necessidade
 
@@ -20,5 +20,6 @@ server_names = [
 "aaaaaaaaaa",
 "dsaokdsoa",
 "top",
-"devops"
+"devops",
+"devops2"
 ]

@@ -20,6 +20,7 @@ resource "vcd_vapp_vm" "vms" {
   vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
+  computer_name    = var.server_names[count.index]  # Nome que será aplicado como Hostname no SO [2]
 
   memory    = var.memory
   cpus      = var.cpus
@@ -40,7 +41,7 @@ resource "vcd_vapp_vm" "vms" {
 
   customization {
     force                      = var.force_customization
-    enabled                    = true # Desabilitamos a customização automática do vCD
+    enabled                    = true 
     allow_local_admin_password = true
     auto_generate_password     = false
     admin_password = var.default_password
