@@ -59,6 +59,8 @@ resource "vcd_vapp_org_network" "networks" {
   vapp_name        = vcd_vapp.my_vapp.name
   org_network_name = var.vapp_network
 
+  reboot_vapp_on_removal = true 
+
   # Esta configuração impede que o Terraform destrua o recurso
   lifecycle {
     prevent_destroy = false

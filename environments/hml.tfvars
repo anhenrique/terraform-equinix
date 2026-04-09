@@ -12,5 +12,5 @@ storage_profile = "EHC-DM-T2"
 # Nome que deseja aplciar nos novos servidores
 
 server_names = [
-"HML-HS-TESTE2",
+"HML-HS-TESTE3",
 ]
