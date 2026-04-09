@@ -8,7 +8,7 @@ module "infra_vapp" {
   vapp_catalog  = var.vapp_catalog
   template_name = var.template_name
   server_names = var.server_names
-
+  storage_profile = var.storage_profile 
   #vm_name_prefix      = var.vm_name_prefix
   vm_numbers          = var.vm_numbers
   memory              = var.memory

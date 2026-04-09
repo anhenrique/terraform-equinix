@@ -27,6 +27,9 @@ resource "vcd_vapp_vm" "vms" {
   power_on  = true
   vdc       = var.vcd_vdc
 
+ # Define a política de disco principal da VM
+  storage_profile = var.storage_profile
+
   network {
     type               = "org"
     name               = var.vapp_network
@@ -57,6 +60,6 @@ resource "vcd_vapp_org_network" "networks" {
 
   # Esta configuração impede que o Terraform destrua o recurso
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
