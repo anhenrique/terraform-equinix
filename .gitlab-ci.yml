@@ -14,7 +14,7 @@ variables:
   # DEFAULT ENV se CI_ENVIRONMENT_NAME estiver vazio
   ENV: "${CI_ENVIRONMENT_NAME}"
   # fallback para dev se ENV estiver vazio (GitLab não expande ${VAR:-default} em fields)
-  ENV_DEFAULT: "hml"
+  ENV_DEFAULT: "prd"
   # Decide qual usar: se ENV vazio, usa ENV_DEFAULT
   ENV_RESOLVED: "${ENV}"
   TF_STATE_NAME: "${ENV_RESOLVED}"
@@ -60,7 +60,7 @@ validate:
 plan:
   stage: plan
   environment:
-    name: "hml"
+    name: "prd"
   script:
     - echo "DEBUG VARS:"
     - env | grep TF_VAR
@@ -77,7 +77,7 @@ plan:
 apply:
   stage: apply
   environment:
-    name: "hml"
+    name: "prd"
   dependencies:
     - plan
   when: manual
