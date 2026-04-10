@@ -20,6 +20,7 @@ resource "vcd_vapp_vm" "vms" {
   vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
+  computer_name    = var.server_names[count.index]  # Nome que será aplicado como Hostname no SO [2]
 
   memory    = var.memory
   cpus      = var.cpus
@@ -39,7 +40,7 @@ resource "vcd_vapp_vm" "vms" {
 
   customization {
     force                      = var.force_customization
-    enabled                    = false # Desabilitamos a customização automática do vCD
+    enabled                    = true 
     allow_local_admin_password = true
     auto_generate_password     = false
     admin_password = var.default_password
@@ -52,11 +53,22 @@ resource "vcd_vapp_vm" "vms" {
       user_password = var.default_password
     }))
   }
+
+  lifecycle {
+    ignore_changes = [
+      customization,
+      guest_properties,
+      vapp_template_id,
+      power_on,
+    ]
+  }  
 }
 
 resource "vcd_vapp_org_network" "networks" {
   vapp_name        = vcd_vapp.my_vapp.name
   org_network_name = var.vapp_network
+
+  reboot_vapp_on_removal = true 
 
   # Esta configuração impede que o Terraform destrua o recurso
   lifecycle {

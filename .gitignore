@@ -1,2 +1,3 @@
 #terraform.vars
 terraform.tfstate
+.terraform.*

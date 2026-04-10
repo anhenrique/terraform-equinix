@@ -18,3 +18,10 @@ output "vapp_vm_ips" {
   # Observe o  logo após a palavra network
   value = [for vm in vcd_vapp_vm.vms : vm.network[0].ip]
 }
+
+output "vapp_vm_ips_concatenados" {
+  description = "Lista de VMs e seus respectivos IPs na Equinix"
+  # Observe o uso do índice  que corrigimos anteriormente
+  value = [for vm in vcd_vapp_vm.vms : "${vm.name}: ${vm.network[0].ip}"]
+}
+

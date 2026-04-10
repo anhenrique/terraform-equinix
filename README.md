@@ -24,7 +24,8 @@ terraform-equinix/
 ├── provider.tf             # Configuração do provider vCD
 ├── backend.tf              # Configuração do backend (GitLab)
 ├── environments/           # Arquivos de variáveis por ambiente
-│   └── dev.tfvars          # Variáveis para ambiente de desenvolvimento
+│   ├── hml.tfvars          # Variáveis para ambiente de homologação
+│   └── prd.tfvars          # Variáveis para ambiente de produção
 ├── infra-vapp/             # Módulo para criação do vApp
 │   ├── vapp.tf             # Recursos do vApp
 │   ├── variables.tf        # Variáveis do módulo
@@ -39,19 +40,24 @@ terraform-equinix/
 
 ### Variáveis Principais
 
-| Variável | Descrição | Tipo | Obrigatório |
-|----------|-----------|------|-------------|
-| `vcd_url` | URL base do vCD | string | Sim |
-| `vcd_org` | Organização no vCD | string | Sim |
-| `vcd_vdc` | VDC dentro da organização | string | Sim |
-| `vcd_api_token` | Token de API para autenticação | string | Sim |
-| `vapp_name` | Nome do vApp | string | Sim |
-| `vapp_network` | Rede da organização | string | Sim |
-| `vapp_catalog` | Catálogo que contém a template | string | Sim |
-| `template_name` | Nome da template | string | Sim |
-| `vm_numbers` | Quantidade de VMs | number | Sim |
-| `vm_name_prefix` | Prefixo para nome das VMs | string | Sim |
-| `default_password` | Senha padrão para VMs | string | Sim |
+| Variável | Descrição | Tipo | Obrigatório | Padrão |
+|----------|-----------|------|-------------|--------|
+| `vcd_url` | URL base do vCD | string | Sim | - |
+| `vcd_org` | Organização no vCD | string | Sim | - |
+| `vcd_vdc` | VDC dentro da organização | string | Sim | - |
+| `vcd_api_token` | Token de API para autenticação | string | Sim | - |
+| `allow_unverified_ssl` | Permitir certificados SSL não verificados | bool | Não | true |
+| `vapp_name` | Nome do vApp | string | Sim | - |
+| `vapp_network` | Rede da organização | string | Sim | - |
+| `vapp_catalog` | Catálogo que contém a template | string | Sim | - |
+| `template_name` | Nome da template | string | Sim | - |
+| `vm_numbers` | Quantidade de VMs | number | Sim | - |
+| `server_names` | Lista de nomes dos servidores | list(string) | Sim | - |
+| `memory` | RAM por VM (MB) | number | Não | 4096 |
+| `cpus` | Número de vCPUs por VM | number | Não | 2 |
+| `cpu_cores` | Cores por CPU | number | Não | 1 |
+| `force_customization` | Forçar customização da VM | bool | Não | false |
+| `default_password` | Senha padrão para VMs | string | Sim | - |
 
 ### Arquivo terraform.tfvars
 
@@ -101,13 +107,21 @@ terraform destroy
 
 O projeto suporta múltiplos ambientes através de arquivos `.tfvars` na pasta `environments/`.
 
-- `dev.tfvars`: Ambiente de desenvolvimento
+- `hml.tfvars`: Ambiente de homologação (HML)
+- `prd.tfvars`: Ambiente de produção (PRD)
 
 Para usar um ambiente específico:
 
 ```bash
-terraform plan -var-file=environments/dev.tfvars
-terraform apply -var-file=environments/dev.tfvars
+terraform plan -var-file=environments/hml.tfvars
+terraform apply -var-file=environments/hml.tfvars
+```
+
+Ou para produção:
+
+```bash
+terraform plan -var-file=environments/prd.tfvars
+terraform apply -var-file=environments/prd.tfvars
 ```
 
 ## CI/CD
