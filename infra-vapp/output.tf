@@ -1,6 +1,6 @@
 output "vapp_name" {
   description = "Nome da vm criado"
-  value       = vcd_vapp.my_vapp.name
+  #value       = vcd_vapp.my_vapp.name
   value       = vcd_vm.vms[0].name # Acessa o nome da primeira VM criada 
 }
 
