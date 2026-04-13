@@ -77,7 +77,7 @@ variable "cpu_cores" {
 variable "force_customization" {
   type        = bool
   description = "Forçar customização da VM"
-  default     = false
+  default     = true
 }
 variable "default_password" {
   type        = string
