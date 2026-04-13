@@ -44,7 +44,7 @@ resource "vcd_vm" "vms" {
     auto_generate_password     = false
     admin_password = var.default_password
     # Se seu template suporta initscript (script shell)
-    initscript = file("${path.module}/scripts/setup.sh")
+    #initscript = file("${path.module}/scripts/setup.sh")
   }
 
   guest_properties = {
@@ -53,14 +53,14 @@ resource "vcd_vm" "vms" {
     }))
   }
 
-  lifecycle {
-    ignore_changes = [
-      customization,
-      guest_properties,
-      vapp_template_id,
-      power_on,
-    ]
-  }  
+#  lifecycle {
+#    ignore_changes = [
+#      customization,
+#      guest_properties,
+#      vapp_template_id,
+#      power_on,
+#    ]
+#  }  
 }
 
 #resource "vcd_vm_org_network" "networks" {
