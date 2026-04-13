@@ -63,9 +63,9 @@ resource "vcd_vm" "vms" {
   }  
 }
 
-resource "vcd_vapp_org_network" "networks" {
+resource "vcd_vm_org_network" "networks" {
   #vapp_name        = vcd_vapp.my_vapp.name
-  vm_name          = vcd_vm.vms[0].name  # Atribui a rede à primeira VM criada
+  vm_name          = vcd_vm.vms.name  # Atribui a rede à primeira VM criada
   org_network_name = var.vapp_network
 
   reboot_vapp_on_removal = true 
