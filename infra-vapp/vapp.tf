@@ -14,14 +14,11 @@ data "vcd_catalog_vapp_template" "template" {
   name       = var.template_name
 }
 
-#resource "vcd_vapp_vm" "vms" {
 resource "vcd_vm" "vms" {
   count = length(var.server_names)
-
-  #vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
-  computer_name    = replace(var.server_names[count.index], "_", "-")  # Nome que será aplicado como Hostname no SO [2]
+  computer_name    = replace(var.server_names[count.index], "_", "-")  # Nome que será aplicado como Hostname no SO
 
   memory    = var.memory
   cpus      = var.cpus
@@ -38,40 +35,29 @@ resource "vcd_vm" "vms" {
   }
 
   customization {
-    force                      = var.force_customization
-    enabled                    = true 
+    enabled                    = true
+    force                      = true
     allow_local_admin_password = true
     auto_generate_password     = false
     admin_password = var.default_password
-    # Se seu template suporta initscript (script shell)
-    #initscript = file("${path.module}/scripts/setup.sh")
+# Script para alterar senha e liberar SSH
+    initscript = <<-EOT
+      echo "root:${var.default_password}" | chpasswd
+      sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+      sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+      systemctl restart ssh
+    EOT
   }
 
   guest_properties = {
     "user-data" = base64encode(templatefile("${path.module}/cloudinit.yaml", {
       user_password = var.default_password
     }))
+  } 
+  lifecycle {
+    ignore_changes = [
+      vapp_template_id,
+    ]
   }
-
-#  lifecycle {
-#    ignore_changes = [
-#      customization,
-#      guest_properties,
-#      vapp_template_id,
-#      power_on,
-#    ]
-#  }  
 }
 
-#resource "vcd_vm_org_network" "networks" {
-#  #vapp_name        = vcd_vapp.my_vapp.name
-#  vm_name          = vcd_vm.vms.name  # Atribui a rede à primeira VM criada
-#  org_network_name = var.vapp_network
-
-#  reboot_vapp_on_removal = true 
-
-#  # Esta configuração impede que o Terraform destrua o recurso
-#  lifecycle {
-#    prevent_destroy = false
-#  }
-#}
