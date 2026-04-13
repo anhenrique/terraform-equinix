@@ -72,7 +72,7 @@ plan:
   artifacts:
     paths:
       - tfplan
-    expire_in: 2h 
+    #expire_in: 2h 
 
 apply:
   stage: apply
