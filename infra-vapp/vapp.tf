@@ -63,15 +63,15 @@ resource "vcd_vm" "vms" {
   }  
 }
 
-resource "vcd_vm_org_network" "networks" {
-  #vapp_name        = vcd_vapp.my_vapp.name
-  vm_name          = vcd_vm.vms.name  # Atribui a rede à primeira VM criada
-  org_network_name = var.vapp_network
+#resource "vcd_vm_org_network" "networks" {
+#  #vapp_name        = vcd_vapp.my_vapp.name
+#  vm_name          = vcd_vm.vms.name  # Atribui a rede à primeira VM criada
+#  org_network_name = var.vapp_network
 
-  reboot_vapp_on_removal = true 
+#  reboot_vapp_on_removal = true 
 
-  # Esta configuração impede que o Terraform destrua o recurso
-  lifecycle {
-    prevent_destroy = false
-  }
-}
+#  # Esta configuração impede que o Terraform destrua o recurso
+#  lifecycle {
+#    prevent_destroy = false
+#  }
+#}
