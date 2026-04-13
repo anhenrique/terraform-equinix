@@ -9,5 +9,6 @@ storage_profile = "EHC-DM-T2"
 
 
 server_names = [
-"HML-HS-AWX"
+"HML-HS-AWX",
+"HML-HS-OZZY"
 ]
