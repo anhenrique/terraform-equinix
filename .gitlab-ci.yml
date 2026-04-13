@@ -14,7 +14,7 @@ variables:
   # DEFAULT ENV se CI_ENVIRONMENT_NAME estiver vazio
   ENV: "${CI_ENVIRONMENT_NAME}"
   # fallback para dev se ENV estiver vazio (GitLab não expande ${VAR:-default} em fields)
-  ENV_DEFAULT: "prd"
+  ENV_DEFAULT: "develop"
   # Decide qual usar: se ENV vazio, usa ENV_DEFAULT
   ENV_RESOLVED: "${ENV}"
   TF_STATE_NAME: "${ENV_RESOLVED}"
