@@ -14,22 +14,21 @@ data "vcd_catalog_vapp_template" "template" {
   name       = var.template_name
 }
 
-resource "vcd_vapp_vm" "vms" {
+#resource "vcd_vapp_vm" "vms" {
+resource "vcd_vm" "vms" {
   count = length(var.server_names)
 
-  vapp_name        = vcd_vapp.my_vapp.name
+  #vapp_name        = vcd_vapp.my_vapp.name
   name             =  var.server_names[count.index]
   vapp_template_id = data.vcd_catalog_vapp_template.template.id
-  computer_name    = var.server_names[count.index]  # Nome que será aplicado como Hostname no SO [2]
+  computer_name    = replace(var.server_names[count.index], "_", "-")  # Nome que será aplicado como Hostname no SO [2]
 
   memory    = var.memory
   cpus      = var.cpus
   cpu_cores = var.cpu_cores
   power_on  = true
   vdc       = var.vcd_vdc
-
- # Define a política de disco principal da VM
-  storage_profile = var.storage_profile
+  storage_profile = var.storage_profile # Define a política de disco principal da VM
 
   network {
     type               = "org"
