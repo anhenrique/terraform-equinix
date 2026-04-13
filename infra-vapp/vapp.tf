@@ -1,7 +1,7 @@
-resource "vcd_vapp" "my_vapp" {
-  name     = var.vapp_name
-  power_on = true
-}
+#resource "vcd_vapp" "my_vapp" {
+#  name     = var.vapp_name
+#  power_on = true
+#}
 
 data "vcd_catalog" "catalog" {
   org  = var.vcd_org
@@ -64,7 +64,8 @@ resource "vcd_vm" "vms" {
 }
 
 resource "vcd_vapp_org_network" "networks" {
-  vapp_name        = vcd_vapp.my_vapp.name
+  #vapp_name        = vcd_vapp.my_vapp.name
+  vm_name          = vcd_vm.vms[0].name  # Atribui a rede à primeira VM criada
   org_network_name = var.vapp_network
 
   reboot_vapp_on_removal = true 
