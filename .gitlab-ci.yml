@@ -60,7 +60,7 @@ validate:
 plan:
   stage: plan
   environment:
-    name: "prd"
+    name: "develop"
   script:
     - echo "DEBUG VARS:"
     - env | grep TF_VAR
@@ -77,7 +77,7 @@ plan:
 apply:
   stage: apply
   environment:
-    name: "prd"
+    name: "develop"
   dependencies:
     - plan
   when: manual
