@@ -64,3 +64,15 @@ jobs:
         run: |
           terraform init -input=false -reconfigure
           terraform apply -input=false tfplan
+    
+  destroy:
+    if: github.event_name == 'workflow_dispatch' # Somente executa se acionado manualmente
+    runs-on: ubuntu-latest
+    environment: production # Exige aprovação manual se configurado no repositório
+    container: hashicorp/terraform:1.14.8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Terraform Destroy
+        run: |
+          terraform init -input=false -reconfigure
+          terraform destroy -auto-approve -var-file="environments/develop.tfvars"
