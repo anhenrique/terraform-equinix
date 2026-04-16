@@ -1,14 +1,11 @@
 terraform {
-  backend "http" {
-    address        = "https://gitlab-hs.hsprevent.com.br/api/v4/projects/387/terraform/state/develop"
-    lock_address   = "https://gitlab-hs.hsprevent.com.br/api/v4/projects/387/terraform/state/develop/lock"
-    unlock_address = "https://gitlab-hs.hsprevent.com.br/api/v4/projects/387/terraform/state/develop/lock"
-    lock_method    = "POST"
-    unlock_method  = "DELETE"
-    retry_wait_min = 5
+  backend "s3" {
+    bucket = "terraform-starter-bucket-b8uzs "
+    key    = "projeto/terraform.tfstate" 
+    region = "sa-east-1"                 
+    
+    # Se você utilizar um provedor S3 compatível (como o da HostDime Brasil), 
+    # será necessário especificar o endpoint:
+    # endpoint = "https://s3.amazonaws.com"
   }
 }
-
-
-
-
