@@ -66,10 +66,13 @@ jobs:
           terraform apply -input=false tfplan
     
   destroy:
-    if: github.event_name == 'workflow_dispatch' # Somente executa se acionado manualmente
+    # Remova a linha do 'if' para o job aparecer sempre
     runs-on: ubuntu-latest
-    environment: production # Exige aprovação manual se configurado no repositório
+    environment: production # É ISSO que deixará o job parado aguardando você
     container: hashicorp/terraform:1.14.8
+    env:
+      TF_VAR_default_password: ${{ secrets.DEFAULT_PASSWORD_SECRET }}
+      TF_VAR_vcd_api_token: ${{ secrets.VCD_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Terraform Destroy
